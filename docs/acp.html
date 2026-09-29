@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ACP 運動遊びメニュー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F6F4; --surface:#FFFFFF; --ink:#16252B; --sub:#55666C; --line:#D9E1DE;
+  --bal:#2B6CD9; --mov:#16925A; --ope:#D98E00;
+  --bal-soft:#E3ECFB; --mov-soft:#DDF2E7; --ope-soft:#FBEFD6;
+  --star:#E6A700;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10181B; --surface:#18242A; --ink:#EAF1EF; --sub:#9DB0B5; --line:#2A3A40;
+    --bal:#6FA0F2; --mov:#4CC98C; --ope:#F2B640;
+    --bal-soft:#1D2D48; --mov-soft:#17352A; --ope-soft:#3A2E14;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10181B; --surface:#18242A; --ink:#EAF1EF; --sub:#9DB0B5; --line:#2A3A40;
+  --bal:#6FA0F2; --mov:#4CC98C; --ope:#F2B640;
+  --bal-soft:#1D2D48; --mov-soft:#17352A; --ope-soft:#3A2E14;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic",Meiryo,sans-serif;
+  font-weight:500;line-height:1.6;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--bal);outline-offset:2px}
+
+.wrap{max-width:640px;margin:0 auto}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);
+  padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.brand h1{margin:0;font-size:1.35rem;font-weight:900;letter-spacing:.02em}
+.brand .count{font-size:.85rem;color:var(--sub)}
+.search{margin-top:10px;width:100%;font:inherit;font-size:1rem;padding:11px 14px;border-radius:12px;
+  border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.chips{display:flex;gap:8px;margin-top:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;
+  padding:7px 14px;font-size:.9rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip.t-bal[aria-pressed="true"]{background:var(--bal);border-color:var(--bal);color:#fff}
+.chip.t-mov[aria-pressed="true"]{background:var(--mov);border-color:var(--mov);color:#fff}
+.chip.t-ope[aria-pressed="true"]{background:var(--ope);border-color:var(--ope);color:#1b1300}
+
+/* list */
+ul.list{list-style:none;margin:0;padding:8px 12px 24px}
+.row{display:flex;align-items:stretch;background:var(--surface);border-radius:14px;margin:8px 0;
+  overflow:hidden;border:1px solid var(--line)}
+.row button.open{flex:1;display:flex;gap:12px;align-items:center;text-align:left;background:none;border:0;
+  padding:12px 4px 12px 0;cursor:pointer;min-height:64px}
+.bands{display:flex;flex-direction:column;width:8px;align-self:stretch;flex:0 0 8px}
+.bands i{flex:1}
+.b-bal{background:var(--bal)} .b-mov{background:var(--mov)} .b-ope{background:var(--ope)}
+.row .name{font-size:1.08rem;font-weight:700;line-height:1.35}
+.row .meta{font-size:.82rem;color:var(--sub);margin-top:2px}
+.row .fav{flex:0 0 52px;background:none;border:0;font-size:1.35rem;cursor:pointer;color:var(--line)}
+.row .fav[aria-pressed="true"]{color:var(--star)}
+.empty{text-align:center;color:var(--sub);padding:40px 16px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:12px 16px 0;font-size:.8rem;color:var(--sub)}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.legend .l-bal::before{background:var(--bal)} .legend .l-mov::before{background:var(--mov)} .legend .l-ope::before{background:var(--ope)}
+
+/* detail */
+.detail{position:fixed;inset:0;z-index:10;background:var(--bg);overflow-y:auto;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  transform:translateY(100%);transition:transform .28s ease;visibility:hidden}
+.detail.show{transform:none;visibility:visible}
+@media (prefers-reduced-motion: reduce){.detail{transition:none}}
+.dbar{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg);padding:10px 8px;border-bottom:1px solid var(--line)}
+.dbar button{background:none;border:0;font-size:1rem;font-weight:700;padding:8px 12px;cursor:pointer}
+.dbar .fav{font-size:1.4rem;color:var(--line)} .dbar .fav[aria-pressed="true"]{color:var(--star)}
+.dhead{padding:18px 18px 8px}
+.dhead h2{margin:0;font-size:1.7rem;font-weight:900;line-height:1.25}
+.dhead .kana{color:var(--sub);font-size:.9rem}
+.types{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.type{font-size:.82rem;font-weight:700;padding:4px 10px;border-radius:8px}
+.type.bal{background:var(--bal-soft);color:var(--bal)}
+.type.mov{background:var(--mov-soft);color:var(--mov)}
+.type.ope{background:var(--ope-soft);color:var(--ope)}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:8px 18px}
+.fact{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.fact b{display:block;font-size:.78rem;color:var(--sub);font-weight:700}
+.fact span{font-size:1rem;font-weight:700}
+section.blk{padding:12px 18px}
+section.blk h3{font-size:1.05rem;margin:6px 0 8px;font-weight:900}
+ol.steps{margin:0;padding:0;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;position:relative;padding:8px 0 8px 40px;border-bottom:1px dashed var(--line)}
+ol.steps li:last-child{border-bottom:0}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:7px;width:28px;height:28px;border-radius:50%;
+  background:var(--ink);color:var(--bg);display:grid;place-items:center;font-weight:900;font-size:.9rem}
+ul.pts{margin:0;padding-left:1.2em} ul.pts li{margin:4px 0}
+.say{background:var(--surface);border-left:5px solid var(--mov);border-radius:10px;padding:10px 14px;margin:6px 0}
+.moves{display:flex;flex-wrap:wrap;gap:6px}
+.moves span{border:1.5px solid var(--line);border-radius:999px;padding:3px 11px;font-size:.88rem}
+.note{font-size:.78rem;color:var(--sub);padding:8px 18px 28px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><h1>ACP 運動遊びメニュー</h1><span class="count" id="count"></span></div>
+    <input class="search" id="q" type="search" placeholder="遊びの名前・動きで探す（例：走る、ボール）" aria-label="検索">
+    <div class="chips" id="chips" role="group" aria-label="絞り込み"></div>
+  </header>
+  <div class="legend"><span class="l-bal">バランスをとる</span><span class="l-mov">移動する</span><span class="l-ope">用具を操作する</span></div>
+  <ul class="list" id="list"></ul>
+</div>
+
+<div class="detail" id="detail" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+  <div class="wrap">
+    <div class="dbar"><button id="back" type="button">‹ 一覧へ戻る</button><button class="fav" id="dFav" type="button" aria-label="お気に入り">★</button></div>
+    <div id="dBody"></div>
+  </div>
+</div>
+
+<script>
+const TYPES={bal:"バランスをとる動き",mov:"移動する動き",ope:"用具などを操作する動き"};
+const PLAYS=[
+{id:"shippo",name:"しっぽとり",kana:"しっぽとり",t:["mov"],n:"5人〜",min:5,place:"どちらも",tool:"タオル・ビブス",moves:["走る","よける","止まる","つかむ"],
+ how:["一人一本、タオルやビブスをズボンの後ろにはさんで「しっぽ」にする","合図でスタート。ほかの子のしっぽを取りに行く","取られても遊びを続け、取ったしっぽは手に持つ","時間内に一番多く取った子の勝ち"],
+ vari:["チーム対抗にして、しっぽの合計本数で競う","しっぽを取られたら指導者のところで付け直して復活できる","範囲を狭くして、よける動きを増やす"],
+ safe:["しっぽは引っ張らず、抜ける程度に軽くはさむ","ぶつからないよう、前を見て走ることを約束する"],
+ say:"「うしろに目があるつもりで！」「くるっと回ってよけてみよう」"},
+{id:"tetsunagi",name:"手つなぎ鬼",kana:"てつなぎおに",t:["mov"],n:"8人〜",min:10,place:"どちらも",tool:"なし",moves:["走る","よける","追いかける"],
+ how:["鬼を1人決める","鬼にタッチされた子は鬼と手をつなぎ、一緒に追いかける","鬼が4人になったら2人ずつに分かれる","全員つかまったら終了。最後まで残った子が次の鬼"],
+ vari:["分かれずに長くつなげていく","範囲を少しずつ狭める"],
+ safe:["手を強く引っ張らない","つないだ手を離さずに曲がると転びやすいことを伝える"],
+ say:"「鬼チームはどっちに走るか相談しよう」"},
+{id:"kori",name:"氷鬼",kana:"こおりおに",t:["mov","bal"],n:"6人〜",min:10,place:"どちらも",tool:"なし",moves:["走る","よける","止まる","くぐる"],
+ how:["鬼を決める","鬼にタッチされた子はその場で「氷」になって止まる","仲間にタッチしてもらう（または足の間をくぐってもらう）と復活","全員が氷になったら鬼の勝ち"],
+ vari:["氷になったらポーズを決める（片足・Y字など）","鬼の人数を増やす"],
+ safe:["足の間をくぐる復活方法のときは、上を通る子と頭がぶつからないようにする"],
+ say:"「かっこいい氷のポーズを見せて！」"},
+{id:"daruma",name:"だるまさんがころんだ",kana:"だるまさんがころんだ",t:["bal","mov"],n:"4人〜",min:10,place:"どちらも",tool:"なし",moves:["歩く","走る","止まる","片足で立つ"],
+ how:["鬼は壁や木に顔を向けて立ち、ほかの子はスタートラインに並ぶ","鬼が「だるまさんがころんだ」と言う間に近づく","鬼が振り返ったら止まる。動いた子は鬼に捕まる","鬼にタッチできたら全員逃げ、鬼が「ストップ」と言うまで走る"],
+ vari:["「だるまさんが〇〇した」と鬼が動きを指定し、そのポーズで止まる","言うスピードを変える"],
+ safe:["逃げるときは前方の障害物に注意する"],
+ say:"「どんなポーズでも止まれるかな？」"},
+{id:"kotoro",name:"ことろことろ",kana:"ことろことろ",t:["mov"],n:"5人〜",min:10,place:"どちらも",tool:"なし",moves:["走る","よける","方向転換"],
+ how:["親を先頭に、子が前の人の肩や腰をつかんで一列になる","鬼は列の一番後ろの子をタッチしに行く","親は両手を広げて鬼を防ぎ、列は鬼から逃げる","一番後ろの子がタッチされたら鬼と交代"],
+ vari:["列の人数を変える","2チーム同時に行う"],
+ safe:["列が大きく振られるので、手が離れたら無理につかまらない","人数が多いと後ろほど振られるため、4〜6人程度にする"],
+ say:"「親は大きく手を広げて守ろう」"},
+{id:"nekonezumi",name:"ねことねずみ",kana:"ねことねずみ",t:["mov"],n:"6人〜（偶数）",min:10,place:"どちらも",tool:"ライン（テープ・コーン）",moves:["走る","反応する","止まる"],
+ how:["中央線をはさんで「ねこ」チームと「ねずみ」チームが向かい合う","指導者が「ねこ」と言ったら、ねこが追いかけ、ねずみは自陣のゴールラインまで逃げる","「ねずみ」と言ったら逆","ゴールまでにタッチできたら1点"],
+ vari:["座る・うつ伏せ・背中合わせなど姿勢を変えてスタート","「ね、ね、ねこ！」など言い方でフェイントを入れる"],
+ safe:["ゴールラインの先に十分なスペースを確保する","向かい合う距離を1.5m以上あける"],
+ say:"「よく聞いて、すぐ動こう」"},
+{id:"donjanken",name:"ドンじゃんけん",kana:"どんじゃんけん",t:["mov","bal"],n:"6人〜",min:10,place:"どちらも",tool:"ライン・フラフープ",moves:["走る","跳ぶ","ケンケン","止まる"],
+ how:["2チームに分かれ、コースの両端の陣地に並ぶ","合図で先頭が走り出し、出会ったら「ドン」でじゃんけん","勝った子はそのまま進み、負けたチームは次の子がスタート","相手の陣地までたどり着いたチームの勝ち"],
+ vari:["コースをくねくね線、平均台、フープにする","ケンケンやカエル跳びで進む"],
+ safe:["出会う場面でぶつからないよう「手前で止まってドン」を約束する"],
+ say:"「負けたらすぐ次の人に声をかけよう」"},
+{id:"keidoro",name:"けいどろ",kana:"けいどろ",t:["mov"],n:"10人〜",min:15,place:"屋外",tool:"コーン（牢屋用）",moves:["走る","よける","追いかける"],
+ how:["「警察」と「泥棒」の2チームに分かれる","警察は泥棒をタッチして牢屋に連れていく","捕まっていない泥棒が牢屋の仲間にタッチすると逃がせる","時間内に全員捕まえれば警察の勝ち"],
+ vari:["時間で役割を交代する","牢屋の見張りの人数を決める"],
+ safe:["範囲を明確にし、指導者から見える範囲で行う"],
+ say:"「助けに行くタイミングを仲間と決めよう」"},
+{id:"nabenabe",name:"なべなべそこぬけ",kana:"なべなべそこぬけ",t:["bal"],n:"2人〜",min:5,place:"どちらも",tool:"なし",moves:["回る","くぐる","体をひねる"],
+ how:["2人で向かい合って両手をつなぐ","「なべなべそこぬけ」と歌いながら手を左右に振る","「そこがぬけたらかえりましょう」で手を離さずにくるっと回り、背中合わせになる","もう一度歌って元に戻る"],
+ vari:["3人、4人…と人数を増やす","クラス全員の輪でチャレンジ"],
+ safe:["腕をねじりすぎないよう、ゆっくり回る"],
+ say:"「どこからくぐれば回れるか考えてみよう」"},
+{id:"janressha",name:"じゃんけん列車",kana:"じゃんけんれっしゃ",t:["mov"],n:"8人〜",min:5,place:"どちらも",tool:"音楽（あれば）",moves:["歩く","走る","スキップ"],
+ how:["音楽に合わせて自由に動き回る","音楽が止まったら近くの子とじゃんけん","負けた子は勝った子の後ろにつき、肩をつかむ","列の先頭同士でじゃんけんを繰り返し、一本の長い列になる"],
+ vari:["移動をスキップ・ケンケン・横歩きにする"],
+ safe:["列が長くなったら走らずに歩く"],
+ say:"「先頭の人、列を引っ張ってね」"},
+{id:"kenkenpa",name:"ケンケンパ",kana:"けんけんぱ",t:["mov","bal"],n:"1人〜",min:5,place:"どちらも",tool:"フラフープ・ライン",moves:["ケンケン","跳ぶ","着地する"],
+ how:["フープや地面の円を「ケン（1つ）」「パ（2つ横並び）」の形に並べる","片足（ケン）と両足（パ）でリズムよく跳んで進む","最後まで踏み外さずに行けたら成功"],
+ vari:["並べ方を子どもたちに考えさせる","後ろ向き、利き足と反対の足で挑戦","リズムを口で言いながら速く"],
+ safe:["フープは滑りやすいので、屋内では円をテープで描く"],
+ say:"「ケン、ケン、パ！声に出してリズムにのろう」"},
+{id:"yurikago",name:"ゆりかご",kana:"ゆりかご",t:["bal"],n:"1人〜",min:3,place:"屋内",tool:"マット",moves:["転がる","起きる","体を丸める"],
+ how:["マットの上で体育座りになり、ひざを抱える","背中を丸めたまま後ろに転がり、前に戻る","勢いをつけて揺れを大きくする","慣れたら手を離して起き上がる"],
+ vari:["揺れた勢いで立ち上がる","2人で向かい合い、同時に揺れる"],
+ safe:["必ずマットの上で行う","頭を打たないよう、おへそを見るようにあごを引く"],
+ say:"「ボールみたいにまあるくなろう」"},
+{id:"teoshi",name:"手押し車",kana:"ておしぐるま",t:["bal","mov"],n:"2人〜",min:5,place:"どちらも",tool:"なし",moves:["腕で支える","這う","運ぶ"],
+ how:["1人が両手を床につき、もう1人がその子の足首かひざを持つ","手で歩いて前に進む","決めた距離を進んだら交代"],
+ vari:["持つ位置を太もも→ひざ→足首と変えて難しくする","短い距離のリレーにする"],
+ safe:["持つ側は急に押さない、速く歩かせない","腕が疲れたらすぐ止まる合図を決めておく"],
+ say:"「持つ人は相手のスピードに合わせてね」"},
+{id:"umatobi",name:"馬跳び",kana:"うまとび",t:["mov","bal"],n:"2人〜",min:5,place:"どちらも",tool:"なし",moves:["跳ぶ","支える","着地する"],
+ how:["1人が「馬」になって前かがみでひざに手をつく","もう1人が助走し、馬の背中に両手をついて足を開いて跳び越す","越えたら交代"],
+ vari:["馬を低くする・高くする","数人並んで連続で跳ぶ"],
+ safe:["馬はあごを引いて頭を下げる","跳ぶ子は背中を強く押さない。低い馬から始める"],
+ say:"「手でしっかり押して、足をパッと開こう」"},
+{id:"ohnami",name:"大波小波",kana:"おおなみこなみ",t:["mov","ope"],n:"3人〜",min:10,place:"屋外",tool:"長縄",moves:["跳ぶ","リズムに合わせる","くぐる"],
+ how:["2人が長縄を持ち、「大波小波」の歌に合わせて左右に揺らす","跳ぶ子は揺れる縄を跳び越す","歌に合わせて縄を回し、最後に縄をまたいで止める"],
+ vari:["揺らすだけ（へび跳び）から始める","回し手も交代して経験する"],
+ safe:["縄の近くで待つ子が引っかからない距離を保つ"],
+ say:"「縄が一番下に来たときにジャンプ！」"},
+{id:"ballhakobi",name:"ボール運びリレー",kana:"ぼーるはこびりれー",t:["ope","mov"],n:"6人〜",min:10,place:"どちらも",tool:"ボール・コーン",moves:["持つ","運ぶ","歩く","走る"],
+ how:["チームごとに一列に並ぶ","ボールを持ってコーンを回って戻り、次の子に渡す","全員早く終わったチームの勝ち"],
+ vari:["2人で背中やお腹にはさんで運ぶ","うちわや新聞紙にのせて運ぶ","ドリブルで運ぶ"],
+ safe:["コーンを回るときに他チームとぶつからない配置にする"],
+ say:"「落とさないコツを見つけよう」"},
+{id:"korogashi",name:"転がしドッジボール",kana:"ころがしどっじぼーる",t:["ope","mov"],n:"8人〜",min:10,place:"どちらも",tool:"やわらかいボール",moves:["転がす","よける","跳ぶ"],
+ how:["外側の円（または四角）にボールを転がすチーム、内側に逃げるチームが入る","外側から床にボールを転がし、内側の子の足に当てる","当たったら外側に移る。時間で交代"],
+ vari:["ボールの数を増やす","内側の子は片足・ケンケンで逃げる"],
+ safe:["ボールは必ず床を転がす（投げない）","やわらかいボールを使う"],
+ say:"「ボールをよく見て、ジャンプでよけよう」"},
+{id:"fusen",name:"風船つき",kana:"ふうせんつき",t:["ope","bal"],n:"1人〜",min:5,place:"屋内",tool:"風船",moves:["打つ","見る","移動する"],
+ how:["風船を手で上に打ち上げる","床に落とさないように何回続けられるか数える","慣れたら2人や輪になって打ち合う"],
+ vari:["手のひら→ひじ→ひざ→頭など、使う部位を指定する","うちわで打つ"],
+ safe:["風船の破裂音が苦手な子に配慮する","周りの人と間隔をとる"],
+ say:"「ふわふわの下に入りこもう」"},
+{id:"sakanatori",name:"魚とり",kana:"さかなとり",t:["mov"],n:"8人〜",min:10,place:"どちらも",tool:"ライン",moves:["走る","よける","追いかける"],
+ how:["コートの中央に「網（鬼）」が手をつないで立ち、魚役は片側のラインに並ぶ","合図で魚は反対側のラインまで渡る","網にタッチされた魚は網に加わる","網を広げながら、最後まで残った魚の勝ち"],
+ vari:["網は手をつながずに横一列で動く","網は中央線上だけを動ける"],
+ safe:["網の手を強く引っ張らない"],
+ say:"「網のすき間はどこかな？」"},
+{id:"tezumo",name:"手押しずもう",kana:"ておしずもう",t:["bal"],n:"2人〜",min:5,place:"どちらも",tool:"なし",moves:["押す","立つ","踏ん張る"],
+ how:["2人が向かい合い、両足をそろえて立つ","手のひら同士を押し合う（体は触らない）","足が動いたほうの負け"],
+ vari:["片足立ちで行う","しゃがんだ姿勢で行う"],
+ safe:["後ろに転んでも安全な広さを確保し、硬い物のそばでは行わない"],
+ say:"「押すだけじゃなく、ひいてみるのも作戦だよ」"},
+{id:"tsunahiki",name:"しっぽ綱引き",kana:"しっぽつなひき",t:["ope","mov"],n:"6人〜",min:10,place:"どちらも",tool:"短い縄・タオル",moves:["引く","つかむ","走る"],
+ how:["中央に縄やタオルを並べ、両チームはスタートラインに並ぶ","合図で走って縄を取りに行く","自陣まで引っ張って持ち帰った本数を競う"],
+ vari:["1本を2人以上で取り合ったら10秒で決着","持ち帰り方をケンケンにする"],
+ safe:["引き合いで急に手を離さない約束をする","引きずられたときの床のすり傷に注意"],
+ say:"「みんなで力を合わせるとどうなる？」"}
+];
+
+const $=s=>document.querySelector(s);
+let favs=new Set();
+try{favs=new Set(JSON.parse(localStorage.getItem("acp-favs")||"[]"))}catch(e){}
+const saveFavs=()=>{try{localStorage.setItem("acp-favs",JSON.stringify([...favs]))}catch(e){}};
+
+const FILTERS=[
+ {k:"all",label:"すべて"},
+ {k:"fav",label:"★ お気に入り"},
+ {k:"bal",label:"バランス",cls:"t-bal"},
+ {k:"mov",label:"移動",cls:"t-mov"},
+ {k:"ope",label:"操作",cls:"t-ope"},
+ {k:"notool",label:"道具なし"},
+ {k:"indoor",label:"屋内OK"},
+ {k:"few",label:"少人数（〜4人）"}
+];
+let active=new Set(["all"]);
+
+function renderChips(){
+  $("#chips").innerHTML=FILTERS.map(f=>`<button type="button" class="chip ${f.cls||""}" data-k="${f.k}" aria-pressed="${active.has(f.k)}">${f.label}</button>`).join("");
+}
+$("#chips").addEventListener("click",e=>{
+  const b=e.target.closest(".chip"); if(!b) return;
+  const k=b.dataset.k;
+  if(k==="all"){active=new Set(["all"])}
+  else{active.delete("all"); active.has(k)?active.delete(k):active.add(k); if(!active.size) active.add("all")}
+  renderChips(); renderList();
+});
+
+function minPeople(n){const m=n.match(/\d+/);return m?+m[0]:1}
+function match(p){
+  const q=$("#q").value.trim();
+  if(q){const hay=[p.name,p.kana,p.tool,...p.moves].join(" "); if(!hay.includes(q)) return false}
+  if(active.has("all")) return true;
+  if(active.has("fav")&&!favs.has(p.id)) return false;
+  const tsel=["bal","mov","ope"].filter(t=>active.has(t));
+  if(tsel.length&&!tsel.some(t=>p.t.includes(t))) return false;
+  if(active.has("notool")&&p.tool!=="なし") return false;
+  if(active.has("indoor")&&p.place==="屋外") return false;
+  if(active.has("few")&&minPeople(p.n)>4) return false;
+  return true;
+}
+function bands(t){return `<span class="bands" aria-hidden="true">${t.map(x=>`<i class="b-${x}"></i>`).join("")}</span>`}
+
+function renderList(){
+  const items=PLAYS.filter(match);
+  $("#count").textContent=`${items.length} / ${PLAYS.length} 件`;
+  if(!items.length){
+    $("#list").innerHTML=`<li class="empty">条件に合う遊びがありません。<br>絞り込みを減らすか、別のことばで検索してください。</li>`;return;
+  }
+  $("#list").innerHTML=items.map(p=>`
+   <li class="row">
+    <button type="button" class="open" data-id="${p.id}">
+      ${bands(p.t)}
+      <span><span class="name">${p.name}</span><div class="meta">${p.n}　${p.min}分　道具：${p.tool}</div></span>
+    </button>
+    <button type="button" class="fav" data-fav="${p.id}" aria-pressed="${favs.has(p.id)}" aria-label="${p.name}をお気に入り">★</button>
+   </li>`).join("");
+}
+$("#list").addEventListener("click",e=>{
+  const f=e.target.closest("[data-fav]");
+  if(f){toggleFav(f.dataset.fav);renderList();return}
+  const o=e.target.closest(".open"); if(o) location.hash="#/"+o.dataset.id;
+});
+$("#q").addEventListener("input",renderList);
+
+function toggleFav(id){favs.has(id)?favs.delete(id):favs.add(id);saveFavs()}
+
+function renderDetail(p){
+  $("#dBody").innerHTML=`
+   <div class="dhead">
+     <h2 id="dTitle">${p.name}</h2>
+     <div class="kana">${p.kana}</div>
+     <div class="types">${p.t.map(t=>`<span class="type ${t}">${TYPES[t]}</span>`).join("")}</div>
+   </div>
+   <div class="facts">
+     <div class="fact"><b>人数</b><span>${p.n}</span></div>
+     <div class="fact"><b>時間の目安</b><span>${p.min}分</span></div>
+     <div class="fact"><b>場所</b><span>${p.place}</span></div>
+     <div class="fact"><b>道具</b><span>${p.tool}</span></div>
+   </div>
+   <section class="blk"><h3>身につく動き</h3><div class="moves">${p.moves.map(m=>`<span>${m}</span>`).join("")}</div></section>
+   <section class="blk"><h3>遊び方</h3><ol class="steps">${p.how.map(s=>`<li>${s}</li>`).join("")}</ol></section>
+   <section class="blk"><h3>アレンジ</h3><ul class="pts">${p.vari.map(s=>`<li>${s}</li>`).join("")}</ul></section>
+   <section class="blk"><h3>安全のポイント</h3><ul class="pts">${p.safe.map(s=>`<li>${s}</li>`).join("")}</ul></section>
+   <section class="blk"><h3>声かけの例</h3><div class="say">${p.say}</div></section>
+   <p class="note">内容は現場用のメモです。公式の遊び方・ねらいは日本スポーツ協会のACPガイドブックで確認してください。</p>`;
+  const df=$("#dFav"); df.setAttribute("aria-pressed",favs.has(p.id)); df.dataset.id=p.id;
+}
+$("#dFav").addEventListener("click",e=>{const id=e.currentTarget.dataset.id;toggleFav(id);e.currentTarget.setAttribute("aria-pressed",favs.has(id));renderList()});
+$("#back").addEventListener("click",()=>{ if(history.length>1&&location.hash) history.back(); else location.hash=""; });
+
+function route(){
+  const id=location.hash.replace("#/","");
+  const p=PLAYS.find(x=>x.id===id);
+  const d=$("#detail");
+  if(p){renderDetail(p);d.scrollTop=0;d.classList.add("show");document.body.style.overflow="hidden";setTimeout(()=>$("#back").focus(),50)}
+  else{d.classList.remove("show");document.body.style.overflow=""}
+}
+window.addEventListener("hashchange",route);
+renderChips();renderList();route();
+</script>
+</body>
+</html>
